@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "1086593564946",
+    "firebase_url": "https://bonusg1ver-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "bonusg1ver",
+    "storage_bucket": "bonusg1ver.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1086593564946:android:7a2f34ccccb67ded7033cb",
+        "android_client_info": {
+          "package_name": "by.bstu.fit.drugov.bonusgiver"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1086593564946-f0qg4iefjhkd45to1rocgo2fcsqg6014.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC-iE6LlS9FJuTDij6CFIWB1z0XqXGlIAQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1086593564946-f0qg4iefjhkd45to1rocgo2fcsqg6014.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

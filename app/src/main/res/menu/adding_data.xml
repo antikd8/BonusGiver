@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:title="Добавить дисциплину" android:id="@+id/add_discipline"/>
+    <item android:title="Добавить преподавателя" android:id="@+id/add_teacher"/>
+    <item android:title="Добавить группу" android:id="@+id/add_group"/>
+    <item android:title="Добавить студента в группу" android:id="@+id/add_student"/>
+
+</menu>

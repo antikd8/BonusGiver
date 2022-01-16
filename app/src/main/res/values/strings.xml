@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">BonusGiver</string>
+    <string name="adding_text">Введите добавляемые данные и нажмите на кнопку "Добавить". Для выхода, нажмите кнопку "Выход".</string>
+    <string name="adding_hint">Добавляемые данные</string>
+</resources>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/add_student_group"
+        android:title="Добавить студентов в группу" />
+    <item
+        android:id="@+id/sort_size"
+        android:icon="@drawable/sort_size"
+        android:title="Отсортировать по бонусам"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/sort_alphabet"
+        android:icon="@drawable/sort_alphabet"
+        android:title="Отсортировать по алфавиту"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/download_bonuses"
+        android:icon="@android:drawable/stat_sys_download"
+        android:title="Скачать список бонусов"
+        app:showAsAction="always" />
+
+
+
+
+</menu>
