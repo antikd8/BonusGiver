@@ -1,40 +1,33 @@
 package by.bstu.fit.drugov.bonusgiver;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Activity;
 import android.app.DatePickerDialog;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
-import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CalendarView;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.SpinnerAdapter;
-import android.widget.Toast;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.database.FirebaseDatabase;
 
-import java.sql.Array;
 import java.sql.SQLException;
-import java.time.DayOfWeek;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
-import by.bstu.fit.drugov.bonusgiver.Helpers.DbHelper;
 import by.bstu.fit.drugov.bonusgiver.Models.Timetable;
 import by.bstu.fit.drugov.bonusgiver.Models.TimetableView;
 
@@ -63,7 +56,6 @@ public class AddTimetable extends AppCompatActivity {
     EditText dateTV;
 
 
-    public DbHelper dbHelper;
     public SQLiteDatabase db;
     public FirebaseDatabase fireDB;
 
@@ -71,10 +63,6 @@ public class AddTimetable extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_timetable);
-
-        dbHelper = new DbHelper(this);
-        db = dbHelper.getWritableDatabase();
-        dbHelper.onCreate(db);
 
         fireDB = FirebaseDatabase.getInstance();
 
@@ -99,25 +87,32 @@ public class AddTimetable extends AppCompatActivity {
     }
 
     private void setGroup() throws SQLException {
-        mapGroup = MainActivity.jdbcHelper.getGroups();
-        adapterGroup = new ArrayAdapter(getApplicationContext(), android.R.layout.simple_list_item_1, mapGroup.values().toArray());
+        mapGroup = Login.jdbcHelper.getGroups();
+        List<Integer> sorted = new ArrayList<>();
+        for (Map.Entry<Integer, String> item:
+                mapGroup.entrySet()) {
+            sorted.add(Integer.parseInt(item.getValue()));
+        }
+        Collections.sort(sorted);
+
+        adapterGroup = new ArrayAdapter(getApplicationContext(), android.R.layout.simple_list_item_1, sorted);
         Group.setAdapter(adapterGroup);
     }
 
     private void setDiscipline() throws SQLException {
-        mapDiscipline = MainActivity.jdbcHelper.getDisciplines();
+        mapDiscipline = Login.jdbcHelper.getDisciplines();
         adapterDiscipline = new ArrayAdapter(getApplicationContext(), android.R.layout.simple_list_item_1, mapDiscipline.values().toArray());
         Discipline.setAdapter(adapterDiscipline);
     }
 
     private void setTeacher() throws SQLException {
-        mapTeacher = MainActivity.jdbcHelper.getTeachers();
+        mapTeacher = Login.jdbcHelper.getTeachers();
         adapterTeacher = new ArrayAdapter(getApplicationContext(), android.R.layout.simple_list_item_1, mapTeacher.values().toArray());
         Teacher.setAdapter(adapterTeacher);
     }
 
     private void setLessonNumber() throws SQLException {
-        mapLesson = MainActivity.jdbcHelper.getLessons();
+        mapLesson = Login.jdbcHelper.getLessons();
         adapterLessonNumber = new ArrayAdapter(getApplicationContext(), android.R.layout.simple_list_item_1, mapLesson.values().toArray());
         LessonNumber.setAdapter(adapterLessonNumber);
 
@@ -191,7 +186,7 @@ public class AddTimetable extends AppCompatActivity {
                 timetable.date = currentDate;
                 tv.date = currentDate;
                 try {
-                    if (MainActivity.jdbcHelper.addTimetable(timetable)) {
+                    if (Login.jdbcHelper.addTimetable(timetable)) {
                         Snackbar.make(findViewById(R.id.coordLayout), "Данные добавлены!", Snackbar.LENGTH_SHORT).show();
                         InputMethodManager imm = (InputMethodManager) AddTimetable.this.getSystemService(Activity.INPUT_METHOD_SERVICE);
                         View view = AddTimetable.this.getCurrentFocus();
@@ -200,8 +195,6 @@ public class AddTimetable extends AppCompatActivity {
                 } catch (SQLException throwables) {
                     throwables.printStackTrace();
                 }
-
-
             }
         });
     }

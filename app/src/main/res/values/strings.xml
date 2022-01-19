@@ -2,4 +2,6 @@
     <string name="app_name">BonusGiver</string>
     <string name="adding_text">Введите добавляемые данные и нажмите на кнопку "Добавить". Для выхода, нажмите кнопку "Выход".</string>
     <string name="adding_hint">Добавляемые данные</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

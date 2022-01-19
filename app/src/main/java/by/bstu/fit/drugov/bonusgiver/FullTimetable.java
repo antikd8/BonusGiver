@@ -4,10 +4,10 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
+import android.opengl.Visibility;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -17,7 +17,6 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -31,7 +30,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import by.bstu.fit.drugov.bonusgiver.Helpers.BonusesAdapter;
-import by.bstu.fit.drugov.bonusgiver.Helpers.DbHelper;
 import by.bstu.fit.drugov.bonusgiver.Helpers.JSONHelper;
 import by.bstu.fit.drugov.bonusgiver.Models.BonusGiver;
 import by.bstu.fit.drugov.bonusgiver.Models.TimetableView;
@@ -50,7 +48,6 @@ public class FullTimetable extends AppCompatActivity {
     ArrayAdapter studentAdapter;
     Map<Integer, String> mapStudents;
 
-    public static DbHelper dbHelper;
     public static SQLiteDatabase db;
     public static Object context;
 
@@ -70,15 +67,15 @@ public class FullTimetable extends AppCompatActivity {
         setListeners();
         context = FullTimetable.this;
 
-        dbHelper = new DbHelper(FullTimetable.this);
-        db = dbHelper.getWritableDatabase();
-        dbHelper.onCreate(db);
-
         Intent prevActivity = getIntent();
         extractDataFromActivity(prevActivity);
+        setBonusesList();
 
+    }
+
+    private void setBonusesList(){
         try {
-            extractBonusesList(MainActivity.jdbcHelper.getBonuses(timetableView.id, Integer.parseInt(timetableView.group)));
+            extractBonusesList(Login.jdbcHelper.getBonuses(timetableView.id, Login.jdbcHelper.getGroupIdByNumber(Integer.parseInt(timetableView.group))));
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -93,6 +90,12 @@ public class FullTimetable extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        if (!Login.user) menu.findItem(R.id.add_student_group).setVisible(false);
         return true;
     }
 
@@ -125,8 +128,8 @@ public class FullTimetable extends AppCompatActivity {
                             return;
                         }
                         try {
-                            MainActivity.jdbcHelper.addStudent(inputData.getText().toString(),
-                                    MainActivity.jdbcHelper.getGroupIdByNumber(Integer.parseInt(timetableView.group)));
+                            Login.jdbcHelper.addStudent(inputData.getText().toString(),
+                                    Login.jdbcHelper.getGroupIdByNumber(Integer.parseInt(timetableView.group)));
                         } catch (SQLException throwables) {
                             throwables.printStackTrace();
                         }
@@ -172,6 +175,11 @@ public class FullTimetable extends AppCompatActivity {
                 break;
             }
 
+            case R.id.refresh_list:{
+                setBonusesList();
+                break;
+            }
+
         }
         return true;
     }
@@ -184,6 +192,7 @@ public class FullTimetable extends AppCompatActivity {
         tvDiscipline = findViewById(R.id.tvDiscipline);
         students = findViewById(R.id.studentList);
         addBonus = findViewById(R.id.buttonAddBonus);
+        if (!Login.user) addBonus.setVisibility(View.INVISIBLE);
     }
 
     private void setListeners() {
@@ -196,8 +205,8 @@ public class FullTimetable extends AppCompatActivity {
                 builder.setView(addBonus);
                 studentSpinner = addBonus.findViewById(R.id.spinnerStudentsAdding);
                 try {
-                    mapStudents = MainActivity.jdbcHelper.getStudents(
-                            MainActivity.jdbcHelper.getGroupIdByNumber
+                    mapStudents = Login.jdbcHelper.getStudents(
+                            Login.jdbcHelper.getGroupIdByNumber
                                     (Integer.parseInt(timetableView.group)),
                             timetableView.id);
                 } catch (SQLException throwables) {
@@ -234,16 +243,16 @@ public class FullTimetable extends AppCompatActivity {
                         int bonus = Integer.parseInt(bonus_adding.getText().toString());
                         String note = note_adding.getText().toString();
                         try {
-                            MainActivity.jdbcHelper.addBonuses(timetableView.id, studentKey, bonus, note);
-                            extractBonusesList(MainActivity.jdbcHelper.getBonuses(timetableView.id, Integer.parseInt(timetableView.group)));
+                            Login.jdbcHelper.addBonuses(timetableView.id, studentKey, bonus, note);
+                            extractBonusesList(Login.jdbcHelper.getBonuses(timetableView.id, Integer.parseInt(timetableView.group)));
                         } catch (SQLException throwables) {
                             throwables.printStackTrace();
                         }
-                        if (bonuses != null) {
-                            adapter = new BonusesAdapter(FullTimetable.this, bonuses);
-                            students.setAdapter(adapter);
-                        }
                         alertDialog.dismiss();
+                        if (bonuses != null) {
+                            setBonusesList();
+                        }
+
                     }
                 });
             }

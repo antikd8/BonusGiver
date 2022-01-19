@@ -27,6 +27,7 @@ import java.util.ArrayList;
 
 import by.bstu.fit.drugov.bonusgiver.AddTimetable;
 import by.bstu.fit.drugov.bonusgiver.FullTimetable;
+import by.bstu.fit.drugov.bonusgiver.Login;
 import by.bstu.fit.drugov.bonusgiver.MainActivity;
 import by.bstu.fit.drugov.bonusgiver.Models.BonusGiver;
 import by.bstu.fit.drugov.bonusgiver.Models.TimetableView;
@@ -59,6 +60,12 @@ public class BonusesAdapter extends ArrayAdapter<BonusGiver> {
         addBonus = view.findViewById(R.id.addBonus);
         removeBonus = view.findViewById(R.id.removeBonus);
         saveChanges = view.findViewById(R.id.saveButton);
+        if(!Login.user){
+            addBonus.setVisibility(View.INVISIBLE);
+            removeBonus.setVisibility(View.INVISIBLE);
+            saveChanges.setVisibility(View.INVISIBLE);
+            note.setEnabled(false);
+        }
 
         addBonus.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -97,10 +104,9 @@ public class BonusesAdapter extends ArrayAdapter<BonusGiver> {
                 currentStudent.note = bonusesArrayList.get(position).note;
                 bonusesArrayList.set(position, currentStudent);
                 System.out.println(bonusesArrayList.get(position).note);
-                FullTimetable.dbHelper.updateBonuses(FullTimetable.db, currentStudent);
                 //TODO исправить отрицательные числа изменить тип данных на инт а в бд на стринг)))
                 try {
-                    MainActivity.jdbcHelper.updateBonuses(currentStudent, FullTimetable.timetableView.id, MainActivity.jdbcHelper.getStudentIdByName(currentStudent.student));
+                    Login.jdbcHelper.updateBonuses(currentStudent, FullTimetable.timetableView.id, Login.jdbcHelper.getStudentIdByName(currentStudent.student));
                 } catch (SQLException throwables) {
                     throwables.printStackTrace();
                 }

@@ -157,7 +157,7 @@ public class JDBCHelper extends AsyncTask<String, String, String> {
     }
 
     public ResultSet getBonuses(int timetableId, int groupId) throws SQLException {
-        CallableStatement statement = connection.prepareCall("dbo.getBOnuses @group = " + groupId + " ,@timetable = " + timetableId);
+        CallableStatement statement = connection.prepareCall("dbo.getBonuses @group = " + groupId + " ,@timetable = " + timetableId);
         return statement.executeQuery();
     }
 
@@ -175,5 +175,17 @@ public class JDBCHelper extends AsyncTask<String, String, String> {
         while (resultSet.next())
             return resultSet.getInt(1);
         return 0;
+    }
+
+    public ResultSet getTimetableWithGroup(String date, int studentGroupNumber) {
+        try {
+            CallableStatement statement = connection.prepareCall("dbo.getTimetableWithGroup @date = '" + date +
+                    "', @group = "+studentGroupNumber);
+            return statement.executeQuery();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+
     }
 }

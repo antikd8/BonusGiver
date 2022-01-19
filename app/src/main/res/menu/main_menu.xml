@@ -3,7 +3,15 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/add_student_group"
-        android:title="Добавить студентов в группу" />
+        android:title="Добавить студентов в группу"
+        android:icon="@drawable/add_user"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/refresh_list"
+        android:title="Обновить список"
+        android:icon="@drawable/refresh"
+        app:showAsAction="always"
+        />
     <item
         android:id="@+id/sort_size"
         android:icon="@drawable/sort_size"

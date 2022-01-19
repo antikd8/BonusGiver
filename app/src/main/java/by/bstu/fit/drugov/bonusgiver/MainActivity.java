@@ -5,6 +5,7 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
@@ -12,6 +13,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.StrictMode;
+import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -22,32 +24,25 @@ import android.widget.CalendarView;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Spinner;
-import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.io.Serializable;
-import java.sql.Array;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Map;
 
-import by.bstu.fit.drugov.bonusgiver.Helpers.DbHelper;
 import by.bstu.fit.drugov.bonusgiver.Helpers.JDBCHelper;
 import by.bstu.fit.drugov.bonusgiver.Helpers.TimetableAdapter;
 import by.bstu.fit.drugov.bonusgiver.Models.TimetableView;
 
 public class MainActivity extends AppCompatActivity {
 
-    public static String currentDate = "30.12.2021";
+    public static String currentDate = "19.1.2022";
     public static CalendarView calendar;
-    public static DbHelper dbHelper;
-    public static SQLiteDatabase db;
-    public static FirebaseDatabase fireDB;
-    public static JDBCHelper jdbcHelper;
 
     TimetableAdapter adapter;
     FloatingActionButton fab;
@@ -55,24 +50,21 @@ public class MainActivity extends AppCompatActivity {
     ListView items;
 
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
-        jdbcHelper = new JDBCHelper();
-        jdbcHelper.execute("");
-
         setContentView(R.layout.activity_main);
 
         setBindings();
+        setRoleOpportunities();
 
-        dbHelper = new DbHelper(MainActivity.this);
-        db = dbHelper.getWritableDatabase();
-        dbHelper.onCreate(db);
-        fireDB = FirebaseDatabase.getInstance();
-        extractValuesResult();
+        try {
+            getTimetable();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
         adapter = new TimetableAdapter(MainActivity.this, timetables);
         items.setAdapter(adapter);
 
@@ -86,11 +78,15 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
-        //addDataDatabase(db);
-
         setListeners();
 
+    }
+
+    private void setRoleOpportunities(){
+        if(!Login.user){
+            fab.setVisibility(View.INVISIBLE);
+
+        }
     }
 
     private void setBindings() {
@@ -102,7 +98,8 @@ public class MainActivity extends AppCompatActivity {
     private void getTimetable() throws SQLException {
 
         timetables = new ArrayList<>();
-        ResultSet result = jdbcHelper.getTimetable(currentDate);
+        ResultSet result = Login.user? Login.jdbcHelper.getTimetable(currentDate):
+                Login.jdbcHelper.getTimetableWithGroup(currentDate, Login.studentGroupNumber);
 
         while (result.next()) {
             TimetableView timetable = new TimetableView();
@@ -117,37 +114,16 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void extractValuesResult() {
-        timetables = new ArrayList<>();
-        Cursor result = dbHelper.getTimetable(db, currentDate);
-        if (result.moveToFirst() && result.getCount() >= 1) {
-            do {
-                TimetableView timetable = new TimetableView();
-                timetable.date = result.getString(result.getColumnIndexOrThrow("Дата"));
-                timetable.teacher = result.getString(result.getColumnIndexOrThrow("Преподаватель"));
-                timetable.group = result.getString(result.getColumnIndexOrThrow("Группа"));
-                timetable.discipline = result.getString(result.getColumnIndexOrThrow("Дисциплина"));
-                timetable.lesson = result.getString(result.getColumnIndexOrThrow("Началo")) + "-" + result.getString(result.getColumnIndexOrThrow("Конец"));
-                timetable.id = result.getInt(result.getColumnIndexOrThrow("_id"));
-                timetables.add(timetable);
-            } while (result.moveToNext());
-        }
-    }
 
     public void setListeners() {
         calendar.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {
             @Override
             public void onSelectedDayChange(@NonNull CalendarView view, int year, int month, int dayOfMonth) {
-                int mYear = year;
-                int mMonth = month;
-                int mDay = dayOfMonth;
-                currentDate = new StringBuilder().append(mDay)
+                currentDate = new StringBuilder().append(dayOfMonth)
                         .append(".")
-                        .append(mMonth + 1)
+                        .append(month + 1)
                         .append(".")
-                        .append(mYear).toString();
-                Cursor result = dbHelper.getTimetable(db, currentDate);
-                //extractValuesResult();
+                        .append(year).toString();
                 try {
                     getTimetable();
                 } catch (SQLException throwables) {
@@ -170,10 +146,11 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.adding_data, menu);
+        if(Login.user) getMenuInflater().inflate(R.menu.adding_data, menu);
         return true;
     }
 
+    @SuppressLint("NonConstantResourceId")
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
@@ -202,6 +179,7 @@ public class MainActivity extends AppCompatActivity {
                 TextView tv = view.findViewById(R.id.textViewText);
                 tv.setText("Группа:");
                 EditText inputData = view.findViewById(R.id.editTextInputField);
+                inputData.setInputType(InputType.TYPE_CLASS_PHONE);
                 createDialogBuilder(builder, tv, inputData);
                 return true;
             }
@@ -211,7 +189,7 @@ public class MainActivity extends AppCompatActivity {
                 Spinner studentSpinner = view.findViewById(R.id.spinnerGroups);
                 Map<Integer, String> mapGroup = null;
                 try {
-                    mapGroup = MainActivity.jdbcHelper.getGroups();
+                    mapGroup = Login.jdbcHelper.getGroups();
                 } catch (SQLException throwables) {
                     throwables.printStackTrace();
                 }
@@ -241,7 +219,7 @@ public class MainActivity extends AppCompatActivity {
                             return;
                         }
                         try {
-                            jdbcHelper.addStudent(inputData.getText().toString(), Integer.parseInt(studentSpinner.getSelectedItem().toString()));
+                            Login.jdbcHelper.addStudent(inputData.getText().toString(), Integer.parseInt(studentSpinner.getSelectedItem().toString()));
                         } catch (SQLException throwables) {
                             throwables.printStackTrace();
                         }
@@ -285,15 +263,15 @@ public class MainActivity extends AppCompatActivity {
                         return;
                     }
                     if ("Преподаватель:".equals(text.getText().toString())) {
-                        jdbcHelper.addTeacher(data.getText().toString());
+                        Login.jdbcHelper.addTeacher(data.getText().toString());
                         alertDialog.dismiss();
                     }
                     if ("Дисциплина:".equals(text.getText().toString())) {
-                        jdbcHelper.addDiscipline(data.getText().toString());
+                        Login.jdbcHelper.addDiscipline(data.getText().toString());
                         alertDialog.dismiss();
                     }
                     if ("Группа:".equals(text.getText().toString())) {
-                        jdbcHelper.addGroup(data.getText().toString());
+                        Login.jdbcHelper.addGroup(data.getText().toString());
                         alertDialog.dismiss();
                     }
                 } catch (SQLException throwables) {
@@ -304,15 +282,4 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-
-    public void addDataDatabase(SQLiteDatabase db) {
-        dbHelper.fillGroups(db);
-        dbHelper.fillStudents(db);
-        dbHelper.fillDays(db);
-        dbHelper.fillDisciplines(db);
-        dbHelper.fillLessons(db);
-        dbHelper.fillTeachers(db);
-        dbHelper.fillTimeTable(db);
-        dbHelper.fillBonusGiver(db);
-    }
 }

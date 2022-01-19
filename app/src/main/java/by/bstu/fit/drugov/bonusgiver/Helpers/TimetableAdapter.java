@@ -33,14 +33,12 @@ public class TimetableAdapter extends ArrayAdapter<TimetableView> {
             view = LayoutInflater.from(getContext()).inflate(R.layout.timetable_item, parent, false);
         }
         TextView tvDate = view.findViewById(R.id.tvDate);
-     //   TextView tvDay = view.findViewById(R.id.tvDay);
         TextView tvTeacher = view.findViewById(R.id.tvTeacher);
         TextView tvLessonInfo = view.findViewById(R.id.tvTime);
         TextView tvGroup = view.findViewById(R.id.tvGroup);
         TextView tvDiscipline = view.findViewById(R.id.tvDiscipline);
 
         tvDate.setText(timetable.date);
-//        tvDay.setText(timetable.dayOfWeek);
         tvTeacher.setText(timetable.teacher);
         tvGroup.setText(timetable.group);
         tvDiscipline.setText(timetable.discipline);
