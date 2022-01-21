@@ -188,4 +188,9 @@ public class JDBCHelper extends AsyncTask<String, String, String> {
         }
 
     }
+
+    public ResultSet getAllBonusesByGroup(int group) throws SQLException {
+        CallableStatement statement = connection.prepareCall("dbo.getAllBonusesByGroup @group="+group);
+        return statement.executeQuery();
+    }
 }

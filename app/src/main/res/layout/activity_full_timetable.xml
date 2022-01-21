@@ -154,6 +154,7 @@
         android:id="@+id/buttonAddBonus"
         android:layout_width="300dp"
         android:layout_height="50dp"
+        android:layout_marginBottom="10dp"
         android:text="ДОБАВИТЬ БОНУСЫ"
         android:textSize="16sp"
         android:textStyle="bold"

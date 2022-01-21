@@ -33,6 +33,8 @@ import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import by.bstu.fit.drugov.bonusgiver.Helpers.JDBCHelper;
@@ -46,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
 
     TimetableAdapter adapter;
     FloatingActionButton fab;
+    FloatingActionButton getAllStatistics;
     ArrayList<TimetableView> timetables;
     ListView items;
 
@@ -62,7 +65,8 @@ public class MainActivity extends AppCompatActivity {
 
         try {
             getTimetable();
-        } catch (SQLException throwables) {
+        } catch (SQLException | InterruptedException throwables) {
+            System.out.println("Возникла ошибка соединения с сетью");
             throwables.printStackTrace();
         }
         adapter = new TimetableAdapter(MainActivity.this, timetables);
@@ -93,14 +97,14 @@ public class MainActivity extends AppCompatActivity {
         fab = findViewById(R.id.floatingActionButton);
         calendar = findViewById(R.id.calendarView);
         items = findViewById(R.id.timetable_listview);
+        getAllStatistics = findViewById(R.id.floatingActionButtonStatistics);
     }
 
-    private void getTimetable() throws SQLException {
-
+    private void getTimetable() throws SQLException, InterruptedException {
         timetables = new ArrayList<>();
+        Thread.sleep(1000);
         ResultSet result = Login.user? Login.jdbcHelper.getTimetable(currentDate):
                 Login.jdbcHelper.getTimetableWithGroup(currentDate, Login.studentGroupNumber);
-
         while (result.next()) {
             TimetableView timetable = new TimetableView();
             timetable.date = result.getString(6);
@@ -111,7 +115,6 @@ public class MainActivity extends AppCompatActivity {
             timetable.id = result.getInt(1);
             timetables.add(timetable);
         }
-
     }
 
 
@@ -126,11 +129,19 @@ public class MainActivity extends AppCompatActivity {
                         .append(year).toString();
                 try {
                     getTimetable();
-                } catch (SQLException throwables) {
+                } catch (SQLException | InterruptedException throwables) {
                     throwables.printStackTrace();
                 }
                 adapter = new TimetableAdapter(MainActivity.this, timetables);
                 items.setAdapter(adapter);
+            }
+        });
+
+        getAllStatistics.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), AllStatistics.class);
+                startActivity(intent);
             }
         });
 
@@ -139,7 +150,6 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(getApplicationContext(), AddTimetable.class);
                 startActivity(intent);
-
             }
         });
     }
@@ -191,9 +201,17 @@ public class MainActivity extends AppCompatActivity {
                 try {
                     mapGroup = Login.jdbcHelper.getGroups();
                 } catch (SQLException throwables) {
+                    System.out.println("Возникла ошибка соединения с сетью");
                     throwables.printStackTrace();
                 }
-                ArrayAdapter adapterGroup = new ArrayAdapter(getApplicationContext(), android.R.layout.simple_list_item_1, mapGroup.values().toArray());
+                List<Integer> sorted = new ArrayList<>();
+                
+                for (Map.Entry<Integer, String> entry:
+                        mapGroup.entrySet()) {
+                    sorted.add(Integer.parseInt(entry.getValue()));
+                }
+                Collections.sort(sorted);
+                ArrayAdapter adapterGroup = new ArrayAdapter(getApplicationContext(), android.R.layout.simple_list_item_1, sorted);
                 studentSpinner.setAdapter(adapterGroup);
                 EditText inputData = view.findViewById(R.id.editTextStudentName);
                 builder.setCancelable(true)
@@ -219,8 +237,9 @@ public class MainActivity extends AppCompatActivity {
                             return;
                         }
                         try {
-                            Login.jdbcHelper.addStudent(inputData.getText().toString(), Integer.parseInt(studentSpinner.getSelectedItem().toString()));
+                            Login.jdbcHelper.addStudent(inputData.getText().toString(), Login.jdbcHelper.getGroupIdByNumber(Integer.parseInt(studentSpinner.getSelectedItem().toString())));
                         } catch (SQLException throwables) {
+                            System.out.println("Возникла ошибка соединения с сетью");
                             throwables.printStackTrace();
                         }
                         alertDialog.dismiss();
@@ -275,11 +294,10 @@ public class MainActivity extends AppCompatActivity {
                         alertDialog.dismiss();
                     }
                 } catch (SQLException throwables) {
+                    System.out.println("Возникла ошибка соединения с сетью");
                     throwables.printStackTrace();
                 }
-
             }
         });
     }
-
 }

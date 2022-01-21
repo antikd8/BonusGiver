@@ -12,7 +12,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.BonusGiver">
-        <activity android:name=".Login" android:exported="true">
+        <activity android:name=".AllStatistics"></activity>
+        <activity
+            android:name=".Login"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -21,8 +24,7 @@
         </activity>
         <activity android:name=".FullTimetable" />
         <activity android:name=".AddTimetable" />
-        <activity
-            android:name=".MainActivity"/>
+        <activity android:name=".MainActivity" />
     </application>
 
 </manifest>

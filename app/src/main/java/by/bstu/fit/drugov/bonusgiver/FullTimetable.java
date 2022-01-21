@@ -4,6 +4,7 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
@@ -48,7 +49,6 @@ public class FullTimetable extends AppCompatActivity {
     ArrayAdapter studentAdapter;
     Map<Integer, String> mapStudents;
 
-    public static SQLiteDatabase db;
     public static Object context;
 
     public static TimetableView timetableView;
@@ -66,26 +66,23 @@ public class FullTimetable extends AppCompatActivity {
         setBindings();
         setListeners();
         context = FullTimetable.this;
-
         Intent prevActivity = getIntent();
         extractDataFromActivity(prevActivity);
         setBonusesList();
-
     }
 
-    private void setBonusesList(){
+    private void setBonusesList() {
         try {
             extractBonusesList(Login.jdbcHelper.getBonuses(timetableView.id, Login.jdbcHelper.getGroupIdByNumber(Integer.parseInt(timetableView.group))));
         } catch (SQLException throwables) {
             throwables.printStackTrace();
+            System.out.println("Возникла ошибка соединения с сетью");
         }
         if (bonuses != null) {
             adapter = new BonusesAdapter(this, bonuses);
             students.setAdapter(adapter);
         }
-
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -99,6 +96,7 @@ public class FullTimetable extends AppCompatActivity {
         return true;
     }
 
+    @SuppressLint("NonConstantResourceId")
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -132,6 +130,7 @@ public class FullTimetable extends AppCompatActivity {
                                     Login.jdbcHelper.getGroupIdByNumber(Integer.parseInt(timetableView.group)));
                         } catch (SQLException throwables) {
                             throwables.printStackTrace();
+                            System.out.println("Возникла ошибка соединения с сетью");
                         }
                         Toast.makeText(FullTimetable.this, "Студент успешно добавлен в группу!", Toast.LENGTH_SHORT).show();
                         alertDialog.dismiss();
@@ -175,11 +174,10 @@ public class FullTimetable extends AppCompatActivity {
                 break;
             }
 
-            case R.id.refresh_list:{
+            case R.id.refresh_list: {
                 setBonusesList();
                 break;
             }
-
         }
         return true;
     }
@@ -210,6 +208,7 @@ public class FullTimetable extends AppCompatActivity {
                                     (Integer.parseInt(timetableView.group)),
                             timetableView.id);
                 } catch (SQLException throwables) {
+                    System.out.println("Возникла ошибка соединения с сетью");
                     throwables.printStackTrace();
                 }
                 studentAdapter = new ArrayAdapter(getApplicationContext(), android.R.layout.simple_list_item_1, mapStudents.values().toArray());
@@ -246,6 +245,7 @@ public class FullTimetable extends AppCompatActivity {
                             Login.jdbcHelper.addBonuses(timetableView.id, studentKey, bonus, note);
                             extractBonusesList(Login.jdbcHelper.getBonuses(timetableView.id, Integer.parseInt(timetableView.group)));
                         } catch (SQLException throwables) {
+                            System.out.println("Возникла ошибка соединения с сетью");
                             throwables.printStackTrace();
                         }
                         alertDialog.dismiss();
@@ -282,5 +282,4 @@ public class FullTimetable extends AppCompatActivity {
             tvDiscipline.setText(timetableView.discipline);
         }
     }
-
 }

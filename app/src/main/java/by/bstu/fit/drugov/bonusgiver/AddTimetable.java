@@ -64,9 +64,6 @@ public class AddTimetable extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_timetable);
 
-        fireDB = FirebaseDatabase.getInstance();
-
-
         LessonNumber = findViewById(R.id.spinnerLessonNumber);
         Teacher = findViewById(R.id.spinnerTeacher);
         Group = findViewById(R.id.spinnerGroup);
