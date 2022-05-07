@@ -138,6 +138,17 @@
 
     </LinearLayout>
 
+    <Button
+        android:id="@+id/buttonAddBonus"
+        android:layout_width="300dp"
+        android:layout_height="50dp"
+        android:text="ДОБАВИТЬ БОНУСЫ"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayoutTimetableInfo" />
+
     <ListView
         android:id="@+id/studentList"
         android:layout_width="0dp"
@@ -145,23 +156,10 @@
         android:divider="@android:drawable/screen_background_light_transparent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayoutTimetableInfo"
+        app:layout_constraintTop_toBottomOf="@+id/buttonAddBonus"
         tools:listitem="@layout/single_student">
 
     </ListView>
-
-    <Button
-        android:id="@+id/buttonAddBonus"
-        android:layout_width="300dp"
-        android:layout_height="50dp"
-        android:layout_marginBottom="10dp"
-        android:text="ДОБАВИТЬ БОНУСЫ"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/studentList" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

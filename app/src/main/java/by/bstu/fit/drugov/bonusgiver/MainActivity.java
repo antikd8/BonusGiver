@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 
 import by.bstu.fit.drugov.bonusgiver.Helpers.JDBCHelper;
+import by.bstu.fit.drugov.bonusgiver.Helpers.SQLiteHelper;
 import by.bstu.fit.drugov.bonusgiver.Helpers.TimetableAdapter;
 import by.bstu.fit.drugov.bonusgiver.Models.TimetableView;
 
@@ -62,6 +63,10 @@ public class MainActivity extends AppCompatActivity {
 
         setBindings();
         setRoleOpportunities();
+
+        SQLiteDatabase db = MainActivity.this.openOrCreateDatabase("BONUSGIVER_DATABASE",MODE_PRIVATE,null);
+        Login.dbHelper = new SQLiteHelper(this,"BONUSGIVER_DATABASE", null, 1);
+
 
         try {
             getTimetable();
@@ -103,16 +108,19 @@ public class MainActivity extends AppCompatActivity {
     private void getTimetable() throws SQLException, InterruptedException {
         timetables = new ArrayList<>();
         Thread.sleep(1000);
-        ResultSet result = Login.user? Login.jdbcHelper.getTimetable(currentDate):
-                Login.jdbcHelper.getTimetableWithGroup(currentDate, Login.studentGroupNumber);
-        while (result.next()) {
+        //ResultSet result = Login.user? Login.jdbcHelper.getTimetable(currentDate):
+        //        Login.jdbcHelper.getTimetableWithGroup(currentDate, Login.studentGroupNumber);
+        Cursor result = Login.user?
+                Login.dbHelper.getTimetable(currentDate):
+                Login.dbHelper.getTimetableWithGroup(currentDate, Login.studentGroupNumber);
+        while (result.moveToNext()) {
             TimetableView timetable = new TimetableView();
-            timetable.date = result.getString(6);
-            timetable.teacher = result.getString(5);
-            timetable.group = result.getString(4);
-            timetable.discipline = result.getString(3);
-            timetable.lesson = result.getString(2);
-            timetable.id = result.getInt(1);
+            timetable.date = result.getString(5);
+            timetable.teacher = result.getString(4);
+            timetable.group = result.getString(3);
+            timetable.discipline = result.getString(2);
+            timetable.lesson = result.getString(1);
+            timetable.id = result.getInt(0);
             timetables.add(timetable);
         }
     }
@@ -198,12 +206,8 @@ public class MainActivity extends AppCompatActivity {
                 AlertDialog.Builder builder = dialogBuilderHandler(view);
                 Spinner studentSpinner = view.findViewById(R.id.spinnerGroups);
                 Map<Integer, String> mapGroup = null;
-                try {
-                    mapGroup = Login.jdbcHelper.getGroups();
-                } catch (SQLException throwables) {
-                    System.out.println("Возникла ошибка соединения с сетью");
-                    throwables.printStackTrace();
-                }
+                //mapGroup = Login.jdbcHelper.getGroups();
+                mapGroup = Login.dbHelper.getGroups();
                 List<Integer> sorted = new ArrayList<>();
                 
                 for (Map.Entry<Integer, String> entry:
@@ -236,12 +240,8 @@ public class MainActivity extends AppCompatActivity {
                             inputData.setError("Пожалуйста, введите данные о студенте!");
                             return;
                         }
-                        try {
-                            Login.jdbcHelper.addStudent(inputData.getText().toString(), Login.jdbcHelper.getGroupIdByNumber(Integer.parseInt(studentSpinner.getSelectedItem().toString())));
-                        } catch (SQLException throwables) {
-                            System.out.println("Возникла ошибка соединения с сетью");
-                            throwables.printStackTrace();
-                        }
+                        //Login.jdbcHelper.addStudent(inputData.getText().toString(), Login.jdbcHelper.getGroupIdByNumber(Integer.parseInt(studentSpinner.getSelectedItem().toString())));
+                        Login.dbHelper.addStudent(inputData.getText().toString(), Login.dbHelper.getGroupIdByNumber(Integer.parseInt(studentSpinner.getSelectedItem().toString())));
                         alertDialog.dismiss();
                     }
                 });
@@ -276,26 +276,24 @@ public class MainActivity extends AppCompatActivity {
         ((AlertDialog) alertDialog).getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                try {
-                    if (data.getText().length() < 1) {
-                        data.setError("Пожалуйста, добавьте нужные данные!");
-                        return;
-                    }
-                    if ("Преподаватель:".equals(text.getText().toString())) {
-                        Login.jdbcHelper.addTeacher(data.getText().toString());
-                        alertDialog.dismiss();
-                    }
-                    if ("Дисциплина:".equals(text.getText().toString())) {
-                        Login.jdbcHelper.addDiscipline(data.getText().toString());
-                        alertDialog.dismiss();
-                    }
-                    if ("Группа:".equals(text.getText().toString())) {
-                        Login.jdbcHelper.addGroup(data.getText().toString());
-                        alertDialog.dismiss();
-                    }
-                } catch (SQLException throwables) {
-                    System.out.println("Возникла ошибка соединения с сетью");
-                    throwables.printStackTrace();
+                if (data.getText().length() < 1) {
+                    data.setError("Пожалуйста, добавьте нужные данные!");
+                    return;
+                }
+                if ("Преподаватель:".equals(text.getText().toString())) {
+                    //Login.jdbcHelper.addTeacher(data.getText().toString());
+                    Login.dbHelper.addTeacher(data.getText().toString());
+                    alertDialog.dismiss();
+                }
+                if ("Дисциплина:".equals(text.getText().toString())) {
+                    //Login.jdbcHelper.addDiscipline(data.getText().toString());
+                    Login.dbHelper.addDiscipline(data.getText().toString());
+                    alertDialog.dismiss();
+                }
+                if ("Группа:".equals(text.getText().toString())) {
+                    //Login.jdbcHelper.addGroup(data.getText().toString());
+                    Login.dbHelper.addGroup(data.getText().toString());
+                    alertDialog.dismiss();
                 }
             }
         });

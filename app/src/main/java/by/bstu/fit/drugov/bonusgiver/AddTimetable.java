@@ -84,7 +84,8 @@ public class AddTimetable extends AppCompatActivity {
     }
 
     private void setGroup() throws SQLException {
-        mapGroup = Login.jdbcHelper.getGroups();
+        //mapGroup = Login.jdbcHelper.getGroups();
+        mapGroup = Login.dbHelper.getGroups();
         List<Integer> sorted = new ArrayList<>();
         for (Map.Entry<Integer, String> item:
                 mapGroup.entrySet()) {
@@ -97,19 +98,22 @@ public class AddTimetable extends AppCompatActivity {
     }
 
     private void setDiscipline() throws SQLException {
-        mapDiscipline = Login.jdbcHelper.getDisciplines();
+        //mapDiscipline = Login.jdbcHelper.getDisciplines();
+        mapDiscipline = Login.dbHelper.getDisciplines();
         adapterDiscipline = new ArrayAdapter(getApplicationContext(), android.R.layout.simple_list_item_1, mapDiscipline.values().toArray());
         Discipline.setAdapter(adapterDiscipline);
     }
 
     private void setTeacher() throws SQLException {
-        mapTeacher = Login.jdbcHelper.getTeachers();
+        //mapTeacher = Login.jdbcHelper.getTeachers();
+        mapTeacher = Login.dbHelper.getTeachers();
         adapterTeacher = new ArrayAdapter(getApplicationContext(), android.R.layout.simple_list_item_1, mapTeacher.values().toArray());
         Teacher.setAdapter(adapterTeacher);
     }
 
     private void setLessonNumber() throws SQLException {
-        mapLesson = Login.jdbcHelper.getLessons();
+        //mapLesson = Login.jdbcHelper.getLessons();
+        mapLesson = Login.dbHelper.getLessons();
         adapterLessonNumber = new ArrayAdapter(getApplicationContext(), android.R.layout.simple_list_item_1, mapLesson.values().toArray());
         LessonNumber.setAdapter(adapterLessonNumber);
 
@@ -182,15 +186,12 @@ public class AddTimetable extends AppCompatActivity {
 
                 timetable.date = currentDate;
                 tv.date = currentDate;
-                try {
-                    if (Login.jdbcHelper.addTimetable(timetable)) {
-                        Snackbar.make(findViewById(R.id.coordLayout), "Данные добавлены!", Snackbar.LENGTH_SHORT).show();
-                        InputMethodManager imm = (InputMethodManager) AddTimetable.this.getSystemService(Activity.INPUT_METHOD_SERVICE);
-                        View view = AddTimetable.this.getCurrentFocus();
-                        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-                    }
-                } catch (SQLException throwables) {
-                    throwables.printStackTrace();
+                // if (Login.jdbcHelper.addTimetable(timetable)) {
+                if (Login.dbHelper.addTimetable(timetable)) {
+                    Snackbar.make(findViewById(R.id.coordLayout), "Данные добавлены!", Snackbar.LENGTH_SHORT).show();
+                    InputMethodManager imm = (InputMethodManager) AddTimetable.this.getSystemService(Activity.INPUT_METHOD_SERVICE);
+                    View view = AddTimetable.this.getCurrentFocus();
+                    imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
                 }
             }
         });

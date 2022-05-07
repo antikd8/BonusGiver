@@ -3,6 +3,7 @@ package by.bstu.fit.drugov.bonusgiver;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.view.View;
@@ -21,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import by.bstu.fit.drugov.bonusgiver.Helpers.JDBCHelper;
+import by.bstu.fit.drugov.bonusgiver.Helpers.SQLiteHelper;
 
 public class Login extends AppCompatActivity {
 
@@ -33,6 +35,7 @@ public class Login extends AppCompatActivity {
     public static boolean user;
     ArrayAdapter adapterGroup;
     public static JDBCHelper jdbcHelper;
+    public static SQLiteHelper dbHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +45,10 @@ public class Login extends AppCompatActivity {
         StrictMode.setThreadPolicy(policy);
         jdbcHelper = new JDBCHelper();
         jdbcHelper.execute("");
+
+        SQLiteDatabase db = this.openOrCreateDatabase("BONUSGIVER_DATABASE",MODE_PRIVATE,null);
+        Login.dbHelper = new SQLiteHelper(this,"BONUSGIVER_DATABASE", null, 1);
+
         setBindings();
         setListeners();
         try {
@@ -53,7 +60,7 @@ public class Login extends AppCompatActivity {
 
     private void setSpinnerList(JDBCHelper helper) throws SQLException, InterruptedException {
         Thread.sleep(2000);
-        Map<Integer, String> groups = helper.getGroups();
+        Map<Integer, String> groups = Login.dbHelper.getGroups();
         List<Integer> sorted = new ArrayList<>();
         for (Map.Entry<Integer, String> item:
              groups.entrySet()) {

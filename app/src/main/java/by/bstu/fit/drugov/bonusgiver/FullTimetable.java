@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.opengl.Visibility;
 import android.os.Build;
@@ -23,7 +24,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -73,7 +73,9 @@ public class FullTimetable extends AppCompatActivity {
 
     private void setBonusesList() {
         try {
-            extractBonusesList(Login.jdbcHelper.getBonuses(timetableView.id, Login.jdbcHelper.getGroupIdByNumber(Integer.parseInt(timetableView.group))));
+            // extractBonusesList(Login.jdbcHelper.getBonuses(timetableView.id, Login.jdbcHelper.getGroupIdByNumber(Integer.parseInt(timetableView.group))));
+            extractBonusesList(Login.dbHelper.getBonuses(timetableView.id,
+                    Login.dbHelper.getGroupIdByNumber(Integer.parseInt(timetableView.group))));
         } catch (SQLException throwables) {
             throwables.printStackTrace();
             System.out.println("Возникла ошибка соединения с сетью");
@@ -125,13 +127,8 @@ public class FullTimetable extends AppCompatActivity {
                             inputData.setError("Пожалуйста, введите информацию о студенте!");
                             return;
                         }
-                        try {
-                            Login.jdbcHelper.addStudent(inputData.getText().toString(),
-                                    Login.jdbcHelper.getGroupIdByNumber(Integer.parseInt(timetableView.group)));
-                        } catch (SQLException throwables) {
-                            throwables.printStackTrace();
-                            System.out.println("Возникла ошибка соединения с сетью");
-                        }
+                        Login.dbHelper.addStudent(inputData.getText().toString(),
+                                Login.dbHelper.getGroupIdByNumber(Integer.parseInt(timetableView.group)));
                         Toast.makeText(FullTimetable.this, "Студент успешно добавлен в группу!", Toast.LENGTH_SHORT).show();
                         alertDialog.dismiss();
                     }
@@ -202,15 +199,12 @@ public class FullTimetable extends AppCompatActivity {
                 AlertDialog.Builder builder = new AlertDialog.Builder(FullTimetable.this);
                 builder.setView(addBonus);
                 studentSpinner = addBonus.findViewById(R.id.spinnerStudentsAdding);
-                try {
-                    mapStudents = Login.jdbcHelper.getStudents(
-                            Login.jdbcHelper.getGroupIdByNumber
-                                    (Integer.parseInt(timetableView.group)),
-                            timetableView.id);
-                } catch (SQLException throwables) {
-                    System.out.println("Возникла ошибка соединения с сетью");
-                    throwables.printStackTrace();
-                }
+                // mapStudents = Login.jdbcHelper.getStudents(
+                //       Login.jdbcHelper.getGroupIdByNumber
+                mapStudents = Login.dbHelper.getStudents(
+                        Login.dbHelper.getGroupIdByNumber
+                                (Integer.parseInt(timetableView.group)),
+                        timetableView.id);
                 studentAdapter = new ArrayAdapter(getApplicationContext(), android.R.layout.simple_list_item_1, mapStudents.values().toArray());
                 studentSpinner.setAdapter(studentAdapter);
                 bonus_adding = addBonus.findViewById(R.id.editTextStudentBonuses);
@@ -242,8 +236,11 @@ public class FullTimetable extends AppCompatActivity {
                         int bonus = Integer.parseInt(bonus_adding.getText().toString());
                         String note = note_adding.getText().toString();
                         try {
-                            Login.jdbcHelper.addBonuses(timetableView.id, studentKey, bonus, note);
-                            extractBonusesList(Login.jdbcHelper.getBonuses(timetableView.id, Integer.parseInt(timetableView.group)));
+                            //Login.jdbcHelper.addBonuses(timetableView.id, studentKey, bonus, note);
+                            //extractBonusesList(Login.jdbcHelper.getBonuses(timetableView.id, Integer.parseInt(timetableView.group)));
+                            Login.dbHelper.addBonuses(timetableView.id, studentKey, bonus, note);
+                            extractBonusesList(Login.dbHelper.getBonuses(timetableView.id,
+                                    Integer.parseInt(timetableView.group)));
                         } catch (SQLException throwables) {
                             System.out.println("Возникла ошибка соединения с сетью");
                             throwables.printStackTrace();
@@ -259,14 +256,14 @@ public class FullTimetable extends AppCompatActivity {
         });
     }
 
-    private void extractBonusesList(ResultSet result) throws SQLException {
-        if (result.getFetchSize() >= 1) {
+    private void extractBonusesList(Cursor result) throws SQLException {
+        if (result.getCount() > 0) {
             bonuses = new ArrayList<>();
-            while (result.next()) {
+            while (result.moveToNext()) {
                 BonusGiver bonus = new BonusGiver();
-                bonus.student = result.getString(1);
-                bonus.bonus = Integer.parseInt(result.getString(2));
-                bonus.note = result.getString(3);
+                bonus.student = result.getString(0);
+                bonus.bonus = Integer.parseInt(result.getString(1));
+                bonus.note = result.getString(2);
                 bonuses.add(bonus);
             }
         }

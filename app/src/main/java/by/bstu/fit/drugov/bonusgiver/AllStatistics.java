@@ -5,6 +5,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
+import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -146,11 +147,8 @@ public class AllStatistics extends AppCompatActivity {
 
     public void setSpinnerItems() {
         Map<Integer, String> groups = null;
-        try {
-            groups = Login.jdbcHelper.getGroups();
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
+        //groups = Login.jdbcHelper.getGroups();
+        groups = Login.dbHelper.getGroups();
         List<Integer> sorted = new ArrayList<>();
         for (Map.Entry<Integer, String> item :
                 groups.entrySet()) {
@@ -162,12 +160,13 @@ public class AllStatistics extends AppCompatActivity {
     }
 
     public void setStatsList() throws SQLException {
-        ResultSet result = Login.jdbcHelper.getAllBonusesByGroup(Integer.parseInt(groupSpinner.getSelectedItem().toString()));
+        //ResultSet result = Login.jdbcHelper.getAllBonusesByGroup(Integer.parseInt(groupSpinner.getSelectedItem().toString()));
+        Cursor result = Login.dbHelper.getAllBonusesByGroup(Integer.parseInt(groupSpinner.getSelectedItem().toString()));
         stats = new ArrayList<>();
-        while (result.next()) {
+        while (result.moveToNext()) {
             Statistics item = new Statistics();
-            item.student = result.getString(1);
-            item.bonuses = Integer.parseInt(result.getString(2));
+            item.student = result.getString(0);
+            item.bonuses = Integer.parseInt(result.getString(1));
             stats.add(item);
         }
         if (stats != null) {

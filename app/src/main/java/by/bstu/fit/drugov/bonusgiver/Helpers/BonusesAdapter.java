@@ -105,11 +105,9 @@ public class BonusesAdapter extends ArrayAdapter<BonusGiver> {
                 bonusesArrayList.set(position, currentStudent);
                 System.out.println(bonusesArrayList.get(position).note);
                 //TODO исправить отрицательные числа изменить тип данных на инт а в бд на стринг)))
-                try {
-                    Login.jdbcHelper.updateBonuses(currentStudent, FullTimetable.timetableView.id, Login.jdbcHelper.getStudentIdByName(currentStudent.student));
-                } catch (SQLException throwables) {
-                    throwables.printStackTrace();
-                }
+                //Login.jdbcHelper.updateBonuses(currentStudent, FullTimetable.timetableView.id, Login.jdbcHelper.getStudentIdByName(currentStudent.student));
+                Login.dbHelper.updateBonuses(currentStudent, FullTimetable.timetableView.id,
+                        Login.dbHelper.getStudentIdByName(currentStudent.student));
                 Toast.makeText((Context) FullTimetable.context,"Данные обновлены", Toast.LENGTH_SHORT).show();
                 note.clearFocus();
             }
